@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+    environment {
+        name = 'Saurabh' //will be available in all stages
+    }
+    parameters {
+        string(name: 'Person', defaultValue: 'Saurabh Raut', description: 'Who are you?')
+        booleanParam(name: 'isMale', defaultValue: true, description: 'Whats your gender?')
+        choice(name: 'City', choices: ['Mumbai', 'Pune', 'Bangalore'], description: 'Whats your city?')
+    }
+
+    stages {
+        stage('Run a Command') {
+            steps {
+                sh '''
+                ls
+                date
+                pwd
+                cal 2023
+                '''
+            }
+        }
+        stage('Environment Variable') {
+            environment {
+                username = 'myusername'
+            }
+            steps {
+                sh 'echo "${BUILD_ID}"'
+                sh 'echo "${name}"'
+                sh 'echo "${username}"'
+            }
+        }
+        stage('Deploy On Test') {
+            steps {
+                echo 'Deployed On Test'
+                sh 'echo "${name}"'
+            }
+        }
+        stage('Parameters') {
+            steps {
+                echo 'Deployed On Prod'
+                sh 'echo "${Person}"'
+            }
+        }
+        stage('Continue ?') {
+            input {
+                message "Should we continue?"
+                ok "Yes we should."
+            }
+            steps {
+                echo "Stage Executed"
+            }
+        }
+        stage ('Deploy On Prod') {
+            steps {
+                echo 'Deploy On Prod'  //Failing this stage intentionally for post Build
+            }
+        }
+    }
+     post { 
+        always { 
+            echo 'I will always say Hello again!'
+        }
+        failure { 
+            echo 'I will say Hello on Failuer!'
+        }
+        success { 
+            echo 'I will say Hello Success!'
+        }
+    }
+}
